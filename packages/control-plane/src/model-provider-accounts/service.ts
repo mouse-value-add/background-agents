@@ -203,6 +203,12 @@ export class ModelProviderAccountService {
   async verify(id: string, actorId: string): Promise<ModelProviderAccount> {
     const account = await this.getAccountForOperation(id, "active_use");
     const adapter = this.requireAdapter(account.provider);
+    if (adapter.supportsVerification === false) {
+      throw new ProviderAccountServiceError(
+        `${account.provider} credentials cannot be verified against the provider`,
+        409
+      );
+    }
     const current = await this.credentials.readCredentialState(account.id, account.provider);
     if (!current) throw new ProviderAccountServiceError("Provider credential not found", 409);
     if (current.exchangeState !== "idle") {

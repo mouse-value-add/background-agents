@@ -340,6 +340,28 @@ describe("ModelProviderAccountService", () => {
     expect(providerAdapter.refresh).not.toHaveBeenCalled();
   });
 
+  it("refuses verification for providers whose credential cannot be verified", async () => {
+    const store = stores(providerAccount({ provider: "anthropic", externalAccountId: null }));
+    const providerAdapter = {
+      ...adapter(),
+      provider: "anthropic" as const,
+      supportsVerification: false,
+    };
+    const service = createService(
+      store,
+      new ModelProviderAccountAdapterRegistry([providerAdapter]),
+      { generateId: () => ACCOUNT_ID, now: () => 1_000 }
+    );
+
+    await expect(service.verify(ACCOUNT_ID, "user-1")).rejects.toMatchObject({
+      status: 409,
+      message: expect.stringMatching(/cannot be verified/),
+    });
+    expect(store.credentials.readCredentialState).not.toHaveBeenCalled();
+    expect(store.credentials.tryBeginExchange).not.toHaveBeenCalled();
+    expect(providerAdapter.refresh).not.toHaveBeenCalled();
+  });
+
   it("does not dispatch verification for an account that requires reconnect", async () => {
     const store = stores(providerAccount({ status: "reconnect_required" }));
     const providerAdapter = adapter();
