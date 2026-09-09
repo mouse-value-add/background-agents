@@ -666,7 +666,8 @@ describe("boundary schemas", () => {
       const result = sandboxEventSchema.safeParse({
         type: "ready",
         sandboxId: "sandbox-1",
-        opencodeSessionId: null,
+        agentSessionId: null,
+        harness: "opencode",
         timestamp: 123,
       });
 
