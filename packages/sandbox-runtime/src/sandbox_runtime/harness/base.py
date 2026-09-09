@@ -163,6 +163,7 @@ class AgentHarness(Protocol):
         ...
 
 
+@runtime_checkable
 class HarnessProcessOwner(Protocol):
     """Supervisor half of the seam: staging plus any resident vendor process."""
 
